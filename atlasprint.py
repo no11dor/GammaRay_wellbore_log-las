@@ -57,92 +57,96 @@ def open_file():
 
 
 def save_las():
-    label8.config(text='wait...')
+    try:
+        label8.config(text='wait...')
 
 
-    global data
-    with open(file_path, 'r') as f:
-        first_data = f.read()
-    # replace mnemonics txt file
-    new_data1 = first_data.replace('TVD', 'TVDSS')
-    new_data2 = new_data1.replace('VERTICALDEPTH', 'TVDSS')
-    new_data3 = new_data2.replace('GAMMA', 'GR')
-    new_data4 = new_data3.replace('GAMA', 'GR')
-    new_data5 = new_data4.replace('MECHSPEED', 'ROP')
-    new_data6 = new_data5.replace('DEPT', 'DEPTH')
-    new_data7 = new_data6.replace('DEPTHH', 'DEPTH')
-    new_data8 = new_data7.replace('GRCX', 'GR')
-    new_data9 = new_data8.replace('TVDSSSS', 'TVDSS')
-    new_data10 = new_data9.replace('MD', 'DEPTH')
-    # read data usig lasio
-    data = lasio.read(new_data10)
-    # data to pandas data frame, rename and sort columns
-    df = data.df()
-    # sort curves dataframe
-    df = df[['GR', 'TVDSS', 'ROP']]
-    global tvdss
-    tvdss = df['TVDSS']
-    #remouve outliers
-    upperlimit = df['GR'].mean() + 3 * df['GR'].std()
-    lowerlimit = df['GR'].mean() - 3 * df['GR'].std()
-    df['GR'] = np.where(df['GR'] > upperlimit, upperlimit, np.where(df['GR'] < lowerlimit, lowerlimit, df['GR']))
-    #approximate by moving average (hueta)
-    # df['GR'] = df['GR'].rolling(window=3).median()
-    #interpolate
-    df['GR'] = df['GR'].interpolate(method='cubic')
-    #smooth curves
-    from scipy.signal import savgol_filter
-    df['GR'] = savgol_filter(df['GR'], window_length = 21, polyorder = 13)
-    df['ROP'] = savgol_filter(df['ROP'], window_length=21, polyorder=5)
-    # pandas to data, write las
-    data.set_data(df)
-    data.write('C:\\AtlasPrint\\TEMP\\LASFILE.las', version=2.0)
+        global data
+        with open(file_path, 'r') as f:
+            first_data = f.read()
+        # replace mnemonics txt file
+        new_data1 = first_data.replace('TVD', 'TVDSS')
+        new_data2 = new_data1.replace('VERTICALDEPTH', 'TVDSS')
+        new_data3 = new_data2.replace('GAMMA', 'GR')
+        new_data4 = new_data3.replace('GAMA', 'GR')
+        new_data5 = new_data4.replace('MECHSPEED', 'ROP')
+        new_data6 = new_data5.replace('DEPT', 'DEPTH')
+        new_data7 = new_data6.replace('DEPTHH', 'DEPTH')
+        new_data8 = new_data7.replace('GRCX', 'GR')
+        new_data9 = new_data8.replace('TVDSSSS', 'TVDSS')
+        new_data10 = new_data9.replace('MD', 'DEPTH')
+        # read data usig lasio
+        data = lasio.read(new_data10)
+        # data to pandas data frame, rename and sort columns
+        df = data.df()
+        # sort curves dataframe
+        df = df[['GR', 'TVDSS', 'ROP']]
+        global tvdss
+        tvdss = df['TVDSS']
+        #remouve outliers
+        upperlimit = df['GR'].mean() + 3 * df['GR'].std()
+        lowerlimit = df['GR'].mean() - 3 * df['GR'].std()
+        df['GR'] = np.where(df['GR'] > upperlimit, upperlimit, np.where(df['GR'] < lowerlimit, lowerlimit, df['GR']))
+        #approximate by moving average (hueta)
+        # df['GR'] = df['GR'].rolling(window=3).median()
+        #interpolate
+        df['GR'] = df['GR'].interpolate(method='cubic')
+        #smooth curves
+        from scipy.signal import savgol_filter
+        df['GR'] = savgol_filter(df['GR'], window_length = 21, polyorder = 13)
+        df['ROP'] = savgol_filter(df['ROP'], window_length=21, polyorder=5)
+        # pandas to data, write las
+        data.set_data(df)
+        data.write('C:\\AtlasPrint\\TEMP\\LASFILE.las', version=2.0)
 
-    #writelines
-    with open('C:\\AtlasPrint\\TEMP\\LASFILE.las', 'r+') as f:
-        lines = f.readlines()
-        for i, line in enumerate(lines):
-            if line.startswith('DEPT'):
-                lines[i] = 'DEPTH.M    001 : Measured Depth                                     \n'
-        f.seek(0)
-        for line in lines:
-            f.write(line)
+        #writelines
+        with open('C:\\AtlasPrint\\TEMP\\LASFILE.las', 'r+') as f:
+            lines = f.readlines()
+            for i, line in enumerate(lines):
+                if line.startswith('DEPT'):
+                    lines[i] = 'DEPTH.M    001 : Measured Depth                                     \n'
+            f.seek(0)
+            for line in lines:
+                f.write(line)
 
-    with open('C:\\AtlasPrint\\TEMP\\LASFILE.las', 'r+') as f:
-        lines = f.readlines()
-        for i, line in enumerate(lines):
-            if line.startswith('GR'):
-                lines[i] = 'GR   .API  --- : Gamma Ray                       \n'
-        f.seek(0)
-        for line in lines:
-            f.write(line)
+        with open('C:\\AtlasPrint\\TEMP\\LASFILE.las', 'r+') as f:
+            lines = f.readlines()
+            for i, line in enumerate(lines):
+                if line.startswith('GR'):
+                    lines[i] = 'GR   .API  --- : Gamma Ray                       \n'
+            f.seek(0)
+            for line in lines:
+                f.write(line)
 
-    with open('C:\\AtlasPrint\\TEMP\\LASFILE.las', 'r+') as f:
-        lines = f.readlines()
-        for i, line in enumerate(lines):
-            if line.startswith('TVDSS'):
-                lines[i] = 'TVDSS.M    --- : True Vertical Depth Sub Sea                            \n'
-        f.seek(0)
-        for line in lines:
-            f.write(line)
+        with open('C:\\AtlasPrint\\TEMP\\LASFILE.las', 'r+') as f:
+            lines = f.readlines()
+            for i, line in enumerate(lines):
+                if line.startswith('TVDSS'):
+                    lines[i] = 'TVDSS.M    --- : True Vertical Depth Sub Sea                            \n'
+            f.seek(0)
+            for line in lines:
+                f.write(line)
 
-    with open('C:\\AtlasPrint\\TEMP\\LASFILE.las', 'r+') as f:
-        lines = f.readlines()
-        for i, line in enumerate(lines):
-            if line.startswith('ROP'):
-                lines[i] = 'ROP  .M/HR --- : Rate Of Penetration                           \n'
-        f.seek(0)
-        for line in lines:
-            f.write(line)
+        with open('C:\\AtlasPrint\\TEMP\\LASFILE.las', 'r+') as f:
+            lines = f.readlines()
+            for i, line in enumerate(lines):
+                if line.startswith('ROP'):
+                    lines[i] = 'ROP  .M/HR --- : Rate Of Penetration                           \n'
+            f.seek(0)
+            for line in lines:
+                f.write(line)
 
-    with open('C:\\AtlasPrint\\TEMP\\LASFILE.las', 'r') as f:
-        finaltxt = f.read()
-    # read txt lasio and save as las
-    lasfinal = lasio.read(finaltxt)
-    lasfinal.write('C:\\AtlasPrint\\TEMP\\LASFILE.las', version=2.0)
-    lasname = filedialog.asksaveasfilename(title=u'save las file ', filetypes=[(".las", ".las")])
-    lasfinal.write(lasname, version=2.0)
-    label8.config(text='.las saved')
+        with open('C:\\AtlasPrint\\TEMP\\LASFILE.las', 'r') as f:
+            finaltxt = f.read()
+        # read txt lasio and save as las
+        lasfinal = lasio.read(finaltxt)
+        lasfinal.write('C:\\AtlasPrint\\TEMP\\LASFILE.las', version=2.0)
+        lasname = filedialog.asksaveasfilename(title=u'save las file ', filetypes=[(".las", ".las")])
+        lasfinal.write(lasname, version=2.0)
+        label8.config(text='.las saved')
+    except Exception as e:
+        messagebox.showinfo('Ошибка MD.pdf', e)
+        label8.config(text='ERROR')
 
 
 def save_md():
