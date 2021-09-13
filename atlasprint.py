@@ -22,10 +22,10 @@ window.configure(background='#333')
 window.title("ATL PLOT EX. v1.0")
 window.bind("<Escape>", lambda e: e.widget.quit())
 window.geometry('700x350')
-img = ImageTk.PhotoImage(Image.open('C:\AtlasPrint\logo_atlas.png'))
+img = ImageTk.PhotoImage(Image.open('C:\\AtlasPrint\\dist\\logo_atlas.png'))
 panel = tk.Label(window, image=img, bg='#333')
 panel.place(relx=0.5, rely=0.45, anchor=CENTER)
-window.iconbitmap('C:\AtlasPrint\icon.ico')
+window.iconbitmap('C:\\AtlasPrint\\dist\\ico.ico')
 fr = Frame(window)
 fr.pack()
 
@@ -235,17 +235,17 @@ def save_md():
         fig.savefig('C:\\AtlasPrint\\TEMP\\GR_PLOT_PDF_md.pdf')
 
         # write changes to xlsx header
-        path = "C:\\AtlasPrint\\Header MD.xlsx"
+        path = "C:\\AtlasPrint\\HEADER\\Header MD.xlsx"
         wb_obj = openpyxl.load_workbook(path.strip())
         sheet_obj = wb_obj.active
         cellThatIsToBeChanged = sheet_obj.cell(row=43, column=2)
         cellThatIsToBeChanged.value = bottomMD
-        wb_obj.save('C:\\AtlasPrint\\Header MD.xlsx')
+        wb_obj.save('C:\\AtlasPrint\\HEADER\\Header MD.xlsx')
         label8.config(text='wait...')
         # save xlsx to pdf
 
         excel = client.Dispatch("Excel.Application")
-        sheets = excel.Workbooks.Open('C:\\AtlasPrint\\Header MD.xlsx')
+        sheets = excel.Workbooks.Open('C:\\AtlasPrint\\HEADER\\Header MD.xlsx')
         work_sheets = sheets.Worksheets[0]
         work_sheets.ExportAsFixedFormat(0, 'C:\\AtlasPrint\\TEMP\\Header MD.pdf')
         sheets.Close(True)
@@ -342,16 +342,16 @@ def save_tvdss():
         fig1.savefig('C:\\AtlasPrint\\TEMP\\GR_PLOT_PDF_tvdss.pdf')
 
         # write chsnges to xlsx
-        path = "C:\\AtlasPrint\\Header TVDSS.xlsx"
+        path = "C:\\AtlasPrint\\HEADER\\Header TVDSS.xlsx"
         wb_obj = openpyxl.load_workbook(path.strip())
         sheet_obj = wb_obj.active
         cellThatIsToBeChanged = sheet_obj.cell(row=43, column=2)
         cellThatIsToBeChanged.value = bottom1
-        wb_obj.save('C:\\AtlasPrint\\Header TVDSS.xlsx')
+        wb_obj.save('C:\\AtlasPrint\\HEADER\\Header TVDSS.xlsx')
 
         # convert xslasx to pdf
         excel = client.Dispatch("Excel.Application")
-        sheets1 = excel.Workbooks.Open('C:\\AtlasPrint\\Header TVDSS.xlsx')
+        sheets1 = excel.Workbooks.Open('C:\\AtlasPrint\\HEADER\\Header TVDSS.xlsx')
         work_sheets1 = sheets1.Worksheets[0]
         work_sheets1.ExportAsFixedFormat(0, 'C:\\AtlasPrint\\TEMP\\Header TVDSS.pdf')
         sheets1.Close(True)
