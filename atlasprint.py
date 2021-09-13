@@ -75,8 +75,9 @@ def save_las():
         new_data8 = new_data7.replace('GRCX', 'GR')
         new_data9 = new_data8.replace('TVDSSSS', 'TVDSS')
         new_data10 = new_data9.replace('MD', 'DEPTH')
+        new_data11 = new_data10.replace('SSTVDSS', 'TVDSS')
         # read data usig lasio
-        data = lasio.read(new_data10)
+        data = lasio.read(new_data11)
         # data to pandas data frame, rename and sort columns
         df = data.df()
         # sort curves dataframe
@@ -104,7 +105,7 @@ def save_las():
             lines = f.readlines()
             for i, line in enumerate(lines):
                 if line.startswith('DEPT'):
-                    lines[i] = 'DEPTH.M    001 : Measured Depth                                     \n'
+                    lines[i] = 'DEPTH.M    001 : Measured Depth                                              \n'
             f.seek(0)
             for line in lines:
                 f.write(line)
@@ -113,7 +114,7 @@ def save_las():
             lines = f.readlines()
             for i, line in enumerate(lines):
                 if line.startswith('GR'):
-                    lines[i] = 'GR   .API  --- : Gamma Ray                       \n'
+                    lines[i] = 'GR   .API  --- : Gamma Ray                                                     \n'
             f.seek(0)
             for line in lines:
                 f.write(line)
@@ -122,7 +123,7 @@ def save_las():
             lines = f.readlines()
             for i, line in enumerate(lines):
                 if line.startswith('TVDSS'):
-                    lines[i] = 'TVDSS.M    --- : True Vertical Depth Sub Sea                            \n'
+                    lines[i] = 'TVDSS.M    --- : True Vertical Depth Sub Sea                                              \n'
             f.seek(0)
             for line in lines:
                 f.write(line)
@@ -131,7 +132,7 @@ def save_las():
             lines = f.readlines()
             for i, line in enumerate(lines):
                 if line.startswith('ROP'):
-                    lines[i] = 'ROP  .M/HR --- : Rate Of Penetration                           \n'
+                    lines[i] = 'ROP  .M/HR --- : Rate Of Penetration                                                    \n'
             f.seek(0)
             for line in lines:
                 f.write(line)
