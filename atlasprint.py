@@ -42,10 +42,13 @@ label8.place(relx=1, rely=0.95, anchor=SE)
 
 
 def animate():
-    for c in itertools.cycle(['✎............................................', '.✎...........................................', '..✎..........................................', '...✎.........................................', '....✎........................................', '.....✎.......................................', '......✎......................................', '.......✎.....................................', '........✎....................................', '.........✎...................................', '..........✎..................................', '...........✎.................................', '............✎................................', '.............✎...............................', '..............✎..............................', '...............✎.............................', '................✎............................', '.................✎...........................', '..................✎..........................', '...................✎.........................', '....................✎........................', '.....................✎.......................', '......................✎......................', '.......................✎.....................', '........................✎....................', '.........................✎...................', '..........................✎..................', '...........................✎.................', '............................✎................', '.............................✎...............', '..............................✎..............', '...............................✎.............', '................................✎............', '.................................✎...........', '..................................✎..........', '...................................✎.........', '....................................✎........', '.....................................✎.......', '......................................✎......', '.......................................✎.....', '........................................✎....', '.........................................✎...', '..........................................✎..', '...........................................✎.', '............................................✎']):
-        label3.config(text = (c))
-        time.sleep(0.05)
-    sys.stdout.write('\rDone!     ')
+    try:
+        for c in itertools.cycle(['✎............................................', '.✎...........................................', '..✎..........................................', '...✎.........................................', '....✎........................................', '.....✎.......................................', '......✎......................................', '.......✎.....................................', '........✎....................................', '.........✎...................................', '..........✎..................................', '...........✎.................................', '............✎................................', '.............✎...............................', '..............✎..............................', '...............✎.............................', '................✎............................', '.................✎...........................', '..................✎..........................', '...................✎.........................', '....................✎........................', '.....................✎.......................', '......................✎......................', '.......................✎.....................', '........................✎....................', '.........................✎...................', '..........................✎..................', '...........................✎.................', '............................✎................', '.............................✎...............', '..............................✎..............', '...............................✎.............', '................................✎............', '.................................✎...........', '..................................✎..........', '...................................✎.........', '....................................✎........', '.....................................✎.......', '......................................✎......', '.......................................✎.....', '........................................✎....', '.........................................✎...', '..........................................✎..', '...........................................✎.', '............................................✎']):
+            label3.config(text = (c))
+            time.sleep(0.05)
+        sys.stdout.write('\rDone!     ')
+    except Exception as e:
+        exit()
 t = threading.Thread(target=animate)
 t.start()
 
@@ -87,7 +90,7 @@ def save_las():
         #remouve outliers
         upperlimit = df['GR'].mean() + 3 * df['GR'].std()
         lowerlimit = df['GR'].mean() - 3 * df['GR'].std()
-        df['GR'] = np.where(df['GR'] > upperlimit, upperlimit, np.where(df['GR'] < lowerlimit, lowerlimit, df['GR']))
+        df['GR'] = np.where(df['GR'] > upperlimit, np.NaN, np.where(df['GR'] < lowerlimit, np.NaN, df['GR']))
         #approximate by moving average (hueta)
         # df['GR'] = df['GR'].rolling(window=3).median()
         #interpolate
@@ -203,6 +206,13 @@ def save_md():
         ax_GR.grid(which='minor', alpha=0.5)
         ax_GR.grid(which='major', alpha=1)
 
+        #annotateGR
+        df1 = data.df()
+        lastnonanvalue = df1['GR'].last_valid_index()
+        lastvaluegr = df1['GR'][::-1].bfill().iloc[0]
+        lastvaluegr = round(lastvaluegr, 1)
+        plt.annotate(str(lastvaluegr) + ' api', (lastvaluegr,lastnonanvalue), xytext=(lastvaluegr, lastnonanvalue+2), color="Green", ha='center')
+
         # track 0 (MD)
         ax_TVDSS = ax[0].twiny()
         ax_TVDSS.set_xlim(bottom12, top12 )
@@ -220,11 +230,13 @@ def save_md():
 
         ax_ROP = ax[0].twiny()
         ax_ROP.set_xlim(100, 0)
-        ax_ROP.set_xlabel('ROP [m/h]', color="Black", fontsize=12)
-        ax_ROP.plot(data['ROP'], data['DEPTH'], color="Black", label='ROP [m/h]', linewidth=1)
-        ax_ROP.tick_params(axis='x', colors='Black', labeltop=True, labelbottom=True, bottom=True)
+        ax_ROP.set_xlabel('ROP [m/h]', color="Red", fontsize=12)
+        ax_ROP.plot(data['ROP'], data['DEPTH'], ':',  color="Red", label='ROP [m/h]', linewidth=1)
+        ax_ROP.tick_params(axis='x', colors='Red', labeltop=True, labelbottom=True, bottom=True, top = True)
         ax_ROP.spines['top'].set_position(('outward', 10))
+        ax_ROP.spines['top'].set_color('Red')
         ax_ROP.spines['bottom'].set_position(('outward', 10))
+        ax_ROP.spines['bottom'].set_color('Red')
         major_ticks = np.arange(0, 101, 50)
         minor_ticks = np.arange(0, 101, 10)
         ax_ROP.set_xticks(major_ticks)
@@ -239,7 +251,7 @@ def save_md():
         path = "C:\\AtlasPrint\\HEADER\\Header MD.xlsx"
         wb_obj = openpyxl.load_workbook(path.strip())
         sheet_obj = wb_obj.active
-        cellThatIsToBeChanged = sheet_obj.cell(row=43, column=2)
+        cellThatIsToBeChanged = sheet_obj.cell(row=41, column=2)
         cellThatIsToBeChanged.value = bottomMD
         wb_obj.save('C:\\AtlasPrint\\HEADER\\Header MD.xlsx')
         label8.config(text='wait...')
@@ -266,8 +278,8 @@ def save_md():
         pdf = PyPDF2.PdfFileReader(pdf)
         page0 = pdf.getPage(0)
         page1 = pdf.getPage(1)
-        page0.scaleBy(0.5)  # float representing scale factor - this happens in-place
-        page1.scaleBy(0.5)  # float representing scale factor - this happens in-place
+        page0.scaleBy(0.3)  # float representing scale factor - this happens in-place
+        page1.scaleBy(0.3)  # float representing scale factor - this happens in-place
         writer = PyPDF2.PdfFileWriter()  # create a writer to save the updated results
         writer.addPage(page0)
         writer.addPage(page1)
@@ -327,11 +339,13 @@ def save_tvdss():
         # track 0 (TVDSS)
         ax_ROP = ax[0].twiny()
         ax_ROP.set_xlim(100, 0)
-        ax_ROP.set_xlabel('ROP [m/h]', color="Black", fontsize=12)
-        ax_ROP.plot(data['ROP'], data['TVDSS'], color="Black", label='ROP [m/h]', linewidth=1)
-        ax_ROP.tick_params(axis='x', colors='Black', labeltop=True, labelbottom=True, bottom=True)
+        ax_ROP.set_xlabel('ROP [m/h]', color="Red", fontsize=12)
+        ax_ROP.plot(data['ROP'], data['TVDSS'], ':', color="Red", label='ROP [m/h]', linewidth=1)
+        ax_ROP.tick_params(axis='x', colors='Red', labeltop=True, labelbottom=True, bottom=True, top=True)
         ax_ROP.spines['top'].set_position(('outward', 10))
+        ax_ROP.spines['top'].set_color('Red')
         ax_ROP.spines['bottom'].set_position(('outward', 10))
+        ax_ROP.spines['bottom'].set_color('Red')
         major_ticks = np.arange(0, 101, 50)
         minor_ticks = np.arange(0, 101, 10)
         ax_ROP.set_xticks(major_ticks)
@@ -346,7 +360,7 @@ def save_tvdss():
         path = "C:\\AtlasPrint\\HEADER\\Header TVDSS.xlsx"
         wb_obj = openpyxl.load_workbook(path.strip())
         sheet_obj = wb_obj.active
-        cellThatIsToBeChanged = sheet_obj.cell(row=43, column=2)
+        cellThatIsToBeChanged = sheet_obj.cell(row=41, column=2)
         cellThatIsToBeChanged.value = bottom1
         wb_obj.save('C:\\AtlasPrint\\HEADER\\Header TVDSS.xlsx')
 
