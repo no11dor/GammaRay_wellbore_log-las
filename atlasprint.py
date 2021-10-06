@@ -15,6 +15,7 @@ import itertools
 from numpy import mean
 from numpy import std
 import PyPDF2
+from hampel import hampel
 
 
 window = Tk()
@@ -91,10 +92,15 @@ def save_las():
         upperlimit = df['GR'].mean() + 3 * df['GR'].std()
         lowerlimit = df['GR'].mean() - 3 * df['GR'].std()
         df['GR'] = np.where(df['GR'] > upperlimit, np.NaN, np.where(df['GR'] < lowerlimit, np.NaN, df['GR']))
+        #hampel filter
+        outliers = hampel(df['GR'], window_size=35, n=2)
+        print(outliers)
+        #replace outliers to NaN
+        df['GR'].iloc[[x for x in range(len(df['GR'])) if x in outliers]] = np.NaN
         #approximate by moving average (hueta)
-        # df['GR'] = df['GR'].rolling(window=3).median()
+        # df['GR'] = df['GR'].rolling(window=2).median()
         #interpolate
-        df['GR'] = df['GR'].interpolate(method='cubic')
+        df['GR'] = df['GR'].interpolate(method='polynomial', order=1)
         #smooth curves
         from scipy.signal import savgol_filter
         df['GR'] = savgol_filter(df['GR'], window_length = 21, polyorder = 13)
@@ -296,6 +302,7 @@ def save_tvdss():
     try:
         # create fig TVDSS
         bottom1 = tvdss.max()
+        bottom2 = tvdss.max()
         top1 = tvdss.min()
         bottom1 -= bottom1 % -10
         top1 -= top1 % +10
@@ -361,7 +368,7 @@ def save_tvdss():
         wb_obj = openpyxl.load_workbook(path.strip())
         sheet_obj = wb_obj.active
         cellThatIsToBeChanged = sheet_obj.cell(row=41, column=2)
-        cellThatIsToBeChanged.value = bottom1
+        cellThatIsToBeChanged.value = bottom2
         wb_obj.save('C:\\AtlasPrint\\HEADER\\Header TVDSS.xlsx')
 
         # convert xslasx to pdf
